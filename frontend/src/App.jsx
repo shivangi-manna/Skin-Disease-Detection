@@ -166,7 +166,7 @@ const App = () => {
   const PredictView = () => (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
       <h1 style={{ marginBottom: '30px' }}>Diagnostic Scan</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: result ? '1.2fr 1fr' : '1fr', gap: '30px' }}>
+      <div className="diagnostic-grid" style={{ display: 'grid', gridTemplateColumns: result ? '1.2fr 1fr' : '1fr', gap: '30px' }}>
         <div className="glass-card" style={{ padding: '60px', textAlign: 'center' }}>
           {!preview ? (
             <div 
@@ -256,11 +256,40 @@ const App = () => {
       </aside>
 
       <main className="main-content">
+        <div className="mobile-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Activity color="var(--primary)" size={24} />
+            <span style={{ fontWeight: '700', fontSize: '1.2rem' }}>DermScan</span>
+          </div>
+          <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Users size={18} />
+          </div>
+        </div>
+
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'history' && <HistoryView />}
         {activeTab === 'predict' && <PredictView />}
         {activeTab === 'settings' && <div style={{ textAlign: 'center', padding: '100px' }}><Settings size={80} color="var(--text-dim)" /><h2 style={{ marginTop: '20px' }}>System Settings</h2></div>}
       </main>
+
+      <div className="bottom-nav">
+        <div className={`bottom-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
+          <LayoutDashboard size={20} />
+          <span>Home</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'predict' ? 'active' : ''}`} onClick={() => setActiveTab('predict')}>
+          <Search size={20} />
+          <span>Scan</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+          <History size={20} />
+          <span>History</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+          <Settings size={20} />
+          <span>Settings</span>
+        </div>
+      </div>
     </div>
   );
 };
