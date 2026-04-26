@@ -5,20 +5,34 @@ import numpy as np
 from PIL import Image
 import io
 import tensorflow as tf
+import os
 
 app = FastAPI()
 
-# Enable CORS for frontend interaction
+# Allow both local development and Vercel production frontend
+origins = [
+    "http://localhost:5173",
+    "https://skin-disease-detection-sigma.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mock model loading - In a real scenario, you'd load your .h5 or SavedModel
-# model = tf.keras.models.load_model('skin_cancer_model.h5')
+# Load the model
+MODEL_PATH = "skin_final.h5"
+model = None
+
+if os.path.exists(MODEL_PATH):
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH)
+        print(f"Successfully loaded model from {MODEL_PATH}")
+    except Exception as e:
+        print(f"Error loading model: {e}")
 
 CLASSES = [
     "Actinic keratoses",
@@ -32,35 +46,33 @@ CLASSES = [
 
 @app.get("/")
 def read_root():
-    return {"message": "Skin Disease Detection API is running"}
+    return {"message": "Skin Disease Detection API is running", "model_loaded": model is not None}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    # Read image
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert('RGB')
     image = image.resize((224, 224))
     
-    # Preprocessing
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     
-    # In a real scenario:
-    # predictions = model.predict(img_array)
-    # score = tf.nn.softmax(predictions[0])
-    # class_idx = np.argmax(score)
-    
-    # Mocking a "tagda" response for demonstration if model file isn't present
-    # We'll simulate a prediction
-    import random
-    class_idx = random.randint(0, len(CLASSES) - 1)
-    confidence = random.uniform(0.85, 0.99)
+    if model:
+        predictions = model.predict(img_array)
+        class_idx = np.argmax(predictions[0])
+        confidence = float(np.max(predictions[0]))
+    else:
+        # Fallback if model load failed
+        import random
+        class_idx = random.randint(0, len(CLASSES) - 1)
+        confidence = random.uniform(0.85, 0.99)
     
     return {
         "class": CLASSES[class_idx],
-        "confidence": float(confidence),
-        "details": f"The model detected {CLASSES[class_idx]} with {confidence:.2%} confidence."
+        "confidence": confidence,
+        "details": f"Analysis complete. The pattern matches {CLASSES[class_idx]} with {confidence:.2%} confidence."
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

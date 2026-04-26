@@ -4,4 +4,4 @@ python-multipart
 tensorflow
 pillow
 numpy
-coremltools
+gunicorn
