@@ -57,16 +57,16 @@ def is_skin_image(image: Image.Image) -> bool:
     img_ycbcr = image.convert('YCbCr')
     ycbcr_data = np.array(img_ycbcr)
     
-    # Skin color ranges in YCbCr
-    # Y: 0-255, Cb: 77-127, Cr: 133-173
+    # Y: > 80, Cb: 85-135, Cr: 135-180 (Standard Medical Skin Range)
+    y = ycbcr_data[:, :, 0]
     cb = ycbcr_data[:, :, 1]
     cr = ycbcr_data[:, :, 2]
     
-    skin_mask = (cb >= 77) & (cb <= 127) & (cr >= 133) & (cr <= 173)
+    skin_mask = (y > 80) & (cb >= 85) & (cb <= 135) & (cr >= 135) & (cr <= 180)
     skin_percentage = (np.sum(skin_mask) / (image.size[0] * image.size[1])) * 100
     
-    # If more than 15% of pixels match skin tone, we consider it valid
-    return skin_percentage > 15
+    # If more than 25% of pixels match strict skin tone, we consider it valid
+    return skin_percentage > 25
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):

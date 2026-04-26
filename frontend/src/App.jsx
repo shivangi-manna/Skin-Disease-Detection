@@ -52,23 +52,8 @@ const App = () => {
         setLoading(false);
       }, 2000);
     } catch (error) {
-      // Fallback for demo
-      setTimeout(() => {
-        const mockResult = {
-          class: "Melanocytic nevi",
-          confidence: 0.9842,
-          details: "Analysis complete. The pattern matches common benign Melanocytic nevi."
-        };
-        setResult(mockResult);
-        setHistory([{ 
-          id: Date.now(), 
-          date: new Date().toISOString().split('T')[0], 
-          diagnosis: mockResult.class, 
-          confidence: mockResult.confidence, 
-          status: 'Completed' 
-        }, ...history]);
-        setLoading(false);
-      }, 2000);
+      alert("Error connecting to server. Please try again.");
+      setLoading(false);
     }
   };
 
