@@ -13,6 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "https://skin-disease-detection-sigma.vercel.app",
+    "*", # Temporary for debugging
 ]
 
 app.add_middleware(
@@ -23,16 +24,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load the model
+# Load the model lazily
 MODEL_PATH = "skin_final.h5"
-model = None
+_model = None
 
-if os.path.exists(MODEL_PATH):
-    try:
-        model = tf.keras.models.load_model(MODEL_PATH)
-        print(f"Successfully loaded model from {MODEL_PATH}")
-    except Exception as e:
-        print(f"Error loading model: {e}")
+def get_model():
+    global _model
+    if _model is None and os.path.exists(MODEL_PATH):
+        try:
+            _model = tf.keras.models.load_model(MODEL_PATH)
+            print(f"Successfully loaded model from {MODEL_PATH}")
+        except Exception as e:
+            print(f"Error loading model: {e}")
+    return _model
 
 CLASSES = [
     "Actinic keratoses",
@@ -46,7 +50,7 @@ CLASSES = [
 
 @app.get("/")
 def read_root():
-    return {"message": "Skin Disease Detection API is running", "model_loaded": model is not None}
+    return {"status": "online", "model_file_exists": os.path.exists(MODEL_PATH)}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -56,6 +60,8 @@ async def predict(file: UploadFile = File(...)):
     
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
+    
+    model = get_model()
     
     if model:
         predictions = model.predict(img_array)
