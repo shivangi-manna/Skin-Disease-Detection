@@ -52,13 +52,39 @@ CLASSES = [
 def read_root():
     return {"status": "online", "model_file_exists": os.path.exists(MODEL_PATH)}
 
+def is_skin_image(image: Image.Image) -> bool:
+    # Convert to YCbCr color space for robust skin detection
+    img_ycbcr = image.convert('YCbCr')
+    ycbcr_data = np.array(img_ycbcr)
+    
+    # Skin color ranges in YCbCr
+    # Y: 0-255, Cb: 77-127, Cr: 133-173
+    cb = ycbcr_data[:, :, 1]
+    cr = ycbcr_data[:, :, 2]
+    
+    skin_mask = (cb >= 77) & (cb <= 127) & (cr >= 133) & (cr <= 173)
+    skin_percentage = (np.sum(skin_mask) / (image.size[0] * image.size[1])) * 100
+    
+    # If more than 15% of pixels match skin tone, we consider it valid
+    return skin_percentage > 15
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert('RGB')
-    image = image.resize((224, 224))
     
-    img_array = np.array(image) / 255.0
+    # --- VALIDATION STEP ---
+    if not is_skin_image(image):
+        return {
+            "error": "Invalid Image",
+            "class": "Non-Skin Image Detected",
+            "confidence": 0.0,
+            "details": "The uploaded image does not appear to be a skin lesion. Please upload a clear, focused photo of the affected area for analysis."
+        }
+    
+    # --- PREDICTION STEP ---
+    image_resized = image.resize((224, 224))
+    img_array = np.array(image_resized) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     
     model = get_model()
@@ -68,7 +94,7 @@ async def predict(file: UploadFile = File(...)):
         class_idx = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
     else:
-        # Fallback if model load failed
+        # Fallback
         import random
         class_idx = random.randint(0, len(CLASSES) - 1)
         confidence = random.uniform(0.85, 0.99)
