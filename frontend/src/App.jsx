@@ -38,7 +38,7 @@ const App = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/predict', formData);
+      const response = await axios.post('https://skin-disease-detection-c79p.onrender.com/predict', formData);
       setTimeout(() => {
         const newResult = response.data;
         setResult(newResult);
