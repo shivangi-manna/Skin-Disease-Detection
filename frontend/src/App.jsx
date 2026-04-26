@@ -225,6 +225,10 @@ const App = () => {
 
   return (
     <div className="app-container">
+      <div className="bg-animate" />
+      <div className="blob" />
+      <div className="blob blob-2" />
+      
       <aside className="sidebar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 10px' }}>
           <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
