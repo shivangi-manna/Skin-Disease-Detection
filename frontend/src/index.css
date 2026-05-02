@@ -53,14 +53,18 @@ body::after {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border-light);
+  border-radius: 100px;
   padding: 16px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
-  top: 0;
+  top: 20px;
   z-index: 100;
+  max-width: 1200px;
+  margin: 20px auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .logo {
