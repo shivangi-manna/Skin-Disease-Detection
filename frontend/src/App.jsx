@@ -1,18 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Upload, Activity, ShieldCheck, ImageIcon, AlertCircle, 
+  Upload, Activity, ShieldCheck, FileImage, AlertCircle, 
   RefreshCcw, LayoutDashboard, History, Settings, LogOut,
-  TrendingUp, Users, CheckCircle, Clock, Search
+  TrendingUp, Users, CheckCircle, Clock, Search,
+  Camera, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [view, setView] = useState('home'); // 'home', 'scan', 'history', 'settings'
+  const [step, setStep] = useState(1); // 1: Upload, 2: Preview/Crop, 3: Analyzing, 4: Result
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  
   const [history, setHistory] = useState(() => {
     const savedHistory = localStorage.getItem('scanHistory');
     if (savedHistory) {
@@ -22,11 +25,7 @@ const App = () => {
         console.error('Failed to parse history', e);
       }
     }
-    return [
-      { id: 1, date: '2026-04-25', diagnosis: 'Melanocytic nevi', confidence: 0.98, status: 'Completed' },
-      { id: 2, date: '2026-04-24', diagnosis: 'Benign keratosis', confidence: 0.92, status: 'Completed' },
-      { id: 3, date: '2026-04-22', diagnosis: 'Vascular lesions', confidence: 0.88, status: 'Completed' },
-    ];
+    return [];
   });
 
   useEffect(() => {
@@ -41,273 +40,271 @@ const App = () => {
       setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
       setResult(null);
+      setError(null);
+      setStep(2);
     }
   };
 
   const handleUpload = async () => {
     if (!file) return;
-    setLoading(true);
+    setStep(3); // Analyzing
+    setError(null);
     
     const formData = new FormData();
     formData.append('file', file);
 
     try {
       const response = await axios.post('https://skin-disease-detection-c79p.onrender.com/predict', formData);
-      setTimeout(() => {
-        const newResult = response.data;
-        setResult(newResult);
-        setHistory([{ 
-          id: Date.now(), 
-          date: new Date().toISOString().split('T')[0], 
-          diagnosis: newResult.class, 
-          confidence: newResult.confidence, 
-          status: 'Completed' 
-        }, ...history]);
-        setLoading(false);
-      }, 2000);
-    } catch (error) {
-      alert("Error connecting to server. Please try again.");
-      setLoading(false);
+      const newResult = response.data;
+      setResult({
+        class: newResult.class || 'Unknown',
+        confidence: newResult.confidence ? (newResult.confidence * 100).toFixed(2) : 0,
+        details: newResult.details
+      });
+      
+      setHistory([{ 
+        id: Date.now(), 
+        date: new Date().toISOString().split('T')[0], 
+        diagnosis: newResult.class, 
+        confidence: newResult.confidence, 
+        status: 'Completed' 
+      }, ...history]);
+      
+      setStep(4);
+    } catch (err) {
+      setError("Error connecting to server. Please try again.");
+      setStep(2); // Back to preview
     }
   };
 
-  const reset = () => {
+  const resetScan = () => {
     setFile(null);
     setPreview(null);
     setResult(null);
+    setError(null);
+    setStep(1);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
   };
 
-  const Dashboard = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+  const startScan = () => {
+    setView('scan');
+    resetScan();
+  };
+
+  const HomeView = () => (
+    <div className="hero-section">
+      <div className="hero-content">
+        <motion.h1 
+          className="hero-title"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Check your skin <br/>with AI Precision.
+        </motion.h1>
+        <motion.p 
+          className="hero-subtitle"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Get instant, secure, and accurate at-home screening for various skin conditions. Powered by advanced dermatological AI.
+        </motion.p>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <button className="btn-primary" onClick={startScan}>
+            <Camera size={20} />
+            Start Skin Scan
+          </button>
+        </motion.div>
+
+        <div style={{ marginTop: '60px' }}>
+          <div className="step-box">
+            <div className="step-num">1</div>
+            <div>Take a clear photo of your skin concern</div>
+          </div>
+          <div className="step-box">
+            <div className="step-num">2</div>
+            <div>AI instantly analyzes the image patterns</div>
+          </div>
+          <div className="step-box">
+            <div className="step-num">3</div>
+            <div>Receive your personalized risk assessment</div>
+          </div>
+        </div>
+      </div>
+      <div className="hero-image-wrapper">
+        <div className="hero-image-blob" />
+        <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=600&q=80" alt="Skin Care" style={{ width: '400px', height: '500px', objectFit: 'cover', borderRadius: '30px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.2)' }} />
+      </div>
+    </div>
+  );
+
+  const ScanWizard = () => (
+    <motion.div className="wizard-card" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+      {step === 1 && (
         <div>
-          <h1 style={{ fontSize: '2.2rem', marginBottom: '8px' }}>Medical Dashboard</h1>
-          <p style={{ color: 'var(--text-dim)' }}>Welcome back, Admin</p>
+          <h2 className="wizard-title">Upload Photo</h2>
+          <p className="wizard-subtitle">Ensure the area is well-lit and the image is in focus.</p>
+          
+          <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
+            <FileImage size={48} color="var(--primary)" style={{ marginBottom: '16px' }} />
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Click to upload skin photo</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Supported formats: JPG, PNG</p>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
+          </div>
         </div>
-        <button className="neon-button" onClick={() => setActiveTab('predict')}>
-          <Search size={18} />
-          New Scan
-        </button>
-      </div>
+      )}
 
-      <div className="stat-grid">
-        <div className="glass-card stat-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-dim)' }}>Total Scans</span>
-            <TrendingUp size={20} color="var(--primary)" />
-          </div>
-          <div className="stat-value">1,284</div>
-          <span style={{ color: 'var(--success)', fontSize: '0.85rem' }}>+12% from last month</span>
-        </div>
-        <div className="glass-card stat-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-dim)' }}>Accuracy</span>
-            <CheckCircle size={20} color="var(--success)" />
-          </div>
-          <div className="stat-value">91%</div>
-          <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>Model: DermScan v2.1</span>
-        </div>
-        <div className="glass-card stat-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--text-dim)' }}>Avg. Confidence</span>
-            <Activity size={20} color="var(--secondary)" />
-          </div>
-          <div className="stat-value">94.2%</div>
-          <span style={{ color: 'var(--success)', fontSize: '0.85rem' }}>Optimized precision</span>
-        </div>
-      </div>
+      {step === 2 && (
+        <div className="preview-container">
+          <h2 className="wizard-title">Review Photo</h2>
+          <p className="wizard-subtitle">Make sure the lesion is clearly visible in the center.</p>
+          
+          <img src={preview} className="preview-image" alt="Preview" />
+          
+          {error && (
+            <div style={{ background: 'var(--danger)', color: 'white', padding: '12px 20px', borderRadius: '8px', width: '100%', textAlign: 'center' }}>
+              {error}
+            </div>
+          )}
 
-      <h2 style={{ marginBottom: '20px' }}>Recent Activity</h2>
-      <div className="glass-card" style={{ padding: '0' }}>
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Diagnosis</th>
-              <th>Confidence</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.slice(0, 3).map(item => (
-              <tr key={item.id}>
-                <td>{item.date}</td>
-                <td style={{ color: 'var(--primary)', fontWeight: '600' }}>{item.diagnosis}</td>
-                <td>{(item.confidence * 100).toFixed(1)}%</td>
-                <td>
-                  <span style={{ color: 'var(--success)', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '100px', fontSize: '0.75rem' }}>
-                    {item.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
+            <button className="btn-secondary" onClick={() => setStep(1)}>Re-upload</button>
+            <button className="btn-primary" onClick={handleUpload}>Run AI Analysis</button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="preview-container" style={{ textAlign: 'center' }}>
+          <h2 className="wizard-title">Analyzing...</h2>
+          <p className="wizard-subtitle">Our AI is comparing your image against clinical databases.</p>
+          
+          <img src={preview} className="preview-image" style={{ opacity: 0.5 }} alt="Scanning" />
+          
+          <div className="progress-container">
+            <motion.div 
+              className="progress-bar"
+              initial={{ width: "0%" }}
+              animate={{ width: "95%" }}
+              transition={{ duration: 5, ease: "easeOut" }}
+            />
+          </div>
+          <p style={{ marginTop: '16px', color: 'var(--primary)', fontWeight: '600' }}>Processing image data...</p>
+        </div>
+      )}
+
+      {step === 4 && result && (
+        <div className="preview-container">
+          <div className="status-badge status-success" style={{ alignSelf: 'center', marginBottom: '10px' }}>
+            <Check size={16} /> Analysis Complete
+          </div>
+          
+          <img src={preview} className="preview-image" style={{ maxHeight: '250px' }} alt="Result" />
+          
+          <div className="result-box" style={{ width: '100%' }}>
+            <p style={{ textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)' }}>Detection</p>
+            <h3 className="result-class">{result.class}</h3>
+            
+            <div style={{ marginTop: '20px', background: 'var(--surface)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '600' }}>Confidence Level</span>
+                <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{result.confidence}%</span>
+              </div>
+              <div className="progress-container" style={{ marginTop: '0', height: '6px' }}>
+                <div className="progress-bar" style={{ width: `${result.confidence}%` }} />
+              </div>
+            </div>
+            
+            <p style={{ marginTop: '24px', color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+              {result.details || "Please consult a medical professional for an official diagnosis."}
+            </p>
+          </div>
+
+          <button className="btn-primary" style={{ marginTop: '20px' }} onClick={resetScan}>New Scan</button>
+        </div>
+      )}
     </motion.div>
   );
 
   const HistoryView = () => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h1 style={{ marginBottom: '30px' }}>Scan History</h1>
-      <div className="glass-card" style={{ padding: '0' }}>
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Diagnosis</th>
-              <th>Confidence</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map(item => (
-              <tr key={item.id}>
-                <td>{item.date}</td>
-                <td style={{ color: 'var(--primary)', fontWeight: '600' }}>{item.diagnosis}</td>
-                <td>{(item.confidence * 100).toFixed(1)}%</td>
-                <td>{item.status}</td>
-                <td><button style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>View Report</button></td>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '8px' }}>Your History</h1>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '40px' }}>Review your past scans and AI assessments.</p>
+      
+      {history.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '60px', background: 'var(--surface)', borderRadius: '24px', border: `1px solid var(--border)` }}>
+          <History size={48} color="var(--border)" style={{ marginBottom: '20px' }} />
+          <h3>No scans yet</h3>
+          <p style={{ color: 'var(--text-muted)', marginTop: '8px', marginBottom: '24px' }}>Start your first skin assessment today.</p>
+          <button className="btn-primary" onClick={startScan}>Start Scan</button>
+        </div>
+      ) : (
+        <div className="table-container">
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Diagnosis</th>
+                <th>Confidence</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {history.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.date}</td>
+                  <td style={{ color: 'var(--primary)', fontWeight: '600' }}>{item.diagnosis}</td>
+                  <td>{(item.confidence ? parseFloat(item.confidence) : 0).toFixed(1)}%</td>
+                  <td>
+                    <span className="status-badge status-success">
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </motion.div>
   );
 
-  const PredictView = () => (
-    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-      <h1 style={{ marginBottom: '30px' }}>Diagnostic Scan</h1>
-      <div className="diagnostic-grid" style={{ display: 'grid', gridTemplateColumns: result ? '1.2fr 1fr' : '1fr', gap: '30px' }}>
-        <div className="glass-card" style={{ padding: '60px', textAlign: 'center' }}>
-          {!preview ? (
-            <div 
-              style={{ border: '2px dashed var(--border)', padding: '60px', borderRadius: '20px', cursor: 'pointer', background: 'rgba(0,0,0,0.02)' }}
-              onClick={() => fileInputRef.current.click()}
-            >
-              <Upload size={48} color="var(--primary)" style={{ marginBottom: '20px' }} />
-              <h3>Drop Patient Image</h3>
-              <p style={{ color: 'var(--text-dim)', marginTop: '10px' }}>JPG, PNG or DICOM format supported</p>
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
-            </div>
-          ) : (
-            <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img src={preview} style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '20px' }} />
-              {loading && <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'var(--primary)', boxShadow: '0 0 20px var(--primary)', animation: 'scan 2s infinite ease-in-out' }} />}
-              {!loading && !result && (
-                <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-                  <button className="neon-button" onClick={handleUpload}>Run Analysis</button>
-                  <button className="neon-button" style={{ background: '#e2e8f0', color: 'var(--text)' }} onClick={reset}>Reset</button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <AnimatePresence>
-          {result && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-              <div className="glass-card" style={{ height: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
-                  <ShieldCheck size={30} color="var(--success)" />
-                  <h2 style={{ fontSize: '1.5rem' }}>Analysis Result</h2>
-                </div>
-                <div style={{ marginBottom: '25px' }}>
-                  <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>DETECTION</span>
-                  <h3 style={{ fontSize: '1.8rem', color: 'var(--primary)', marginTop: '5px' }}>{result.class}</h3>
-                </div>
-                <div style={{ marginBottom: '25px' }}>
-                  <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>CONFIDENCE LEVEL</span>
-                  <div style={{ height: '8px', background: 'rgba(0,0,0,0.05)', borderRadius: '4px', marginTop: '10px', overflow: 'hidden' }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${result.confidence * 100}%` }} style={{ height: '100%', background: 'var(--primary)' }} />
-                  </div>
-                  <div style={{ marginTop: '5px', textAlign: 'right', color: 'var(--primary)', fontWeight: '700' }}>{(result.confidence * 100).toFixed(2)}%</div>
-                </div>
-                <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '15px', borderRadius: '12px', fontSize: '0.9rem', color: 'var(--text-dim)', lineHeight: '1.5' }}>
-                  {result.details}
-                </div>
-                <button className="neon-button" style={{ width: '100%', marginTop: '30px' }} onClick={reset}>New Diagnosis</button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+  const SettingsView = () => (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', padding: '60px' }}>
+      <Settings size={64} color="var(--border)" style={{ marginBottom: '24px' }} />
+      <h1 style={{ fontSize: '2rem' }}>Settings</h1>
+      <p style={{ color: 'var(--text-muted)', marginTop: '12px' }}>Your account preferences will appear here.</p>
     </motion.div>
   );
 
   return (
-    <div className="app-container">
-      <div className="bg-animate" />
-      <div className="blob" />
-      <div className="blob blob-2" />
-      
-      <aside className="sidebar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 10px' }}>
-          <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Activity color="white" size={24} />
-          </div>
-          <h2 style={{ fontSize: '1.4rem' }}>DermScan</h2>
+    <div>
+      <header className="top-header">
+        <div className="logo" onClick={() => setView('home')} style={{ cursor: 'pointer' }}>
+          <Activity size={28} />
+          DermScan AI
         </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-            <LayoutDashboard size={20} /> Dashboard
-          </div>
-          <div className={`nav-item ${activeTab === 'predict' ? 'active' : ''}`} onClick={() => setActiveTab('predict')}>
-            <Search size={20} /> Diagnostic
-          </div>
-          <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-            <History size={20} /> History
-          </div>
-          <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <Settings size={20} /> Settings
-          </div>
+        <nav className="nav-links">
+          <span className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>Home</span>
+          <span className={`nav-link ${view === 'scan' ? 'active' : ''}`} onClick={() => setView('scan')}>Scanner</span>
+          <span className={`nav-link ${view === 'history' ? 'active' : ''}`} onClick={() => setView('history')}>History</span>
+          <span className={`nav-link ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>Settings</span>
         </nav>
+      </header>
 
-        <div style={{ marginTop: 'auto' }}>
-          <div className="nav-item" style={{ color: 'var(--danger)' }}>
-            <LogOut size={20} /> Logout
-          </div>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <div className="mobile-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Activity color="var(--primary)" size={24} />
-            <span style={{ fontWeight: '700', fontSize: '1.2rem' }}>DermScan</span>
-          </div>
-          <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={18} />
-          </div>
-        </div>
-
-        {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'history' && <HistoryView />}
-        {activeTab === 'predict' && <PredictView />}
-        {activeTab === 'settings' && <div style={{ textAlign: 'center', padding: '100px' }}><Settings size={80} color="var(--text-dim)" /><h2 style={{ marginTop: '20px' }}>System Settings</h2></div>}
+      <main className="main-container">
+        {view === 'home' && <HomeView />}
+        {view === 'scan' && <ScanWizard />}
+        {view === 'history' && <HistoryView />}
+        {view === 'settings' && <SettingsView />}
       </main>
-
-      <div className="bottom-nav">
-        <div className={`bottom-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-          <LayoutDashboard size={20} />
-          <span>Home</span>
-        </div>
-        <div className={`bottom-nav-item ${activeTab === 'predict' ? 'active' : ''}`} onClick={() => setActiveTab('predict')}>
-          <Search size={20} />
-          <span>Scan</span>
-        </div>
-        <div className={`bottom-nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-          <History size={20} />
-          <span>History</span>
-        </div>
-        <div className={`bottom-nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-          <Settings size={20} />
-          <span>Settings</span>
-        </div>
-      </div>
     </div>
   );
 };
