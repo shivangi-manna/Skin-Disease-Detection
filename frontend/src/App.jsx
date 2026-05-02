@@ -327,6 +327,13 @@ const App = () => {
 
   return (
     <div>
+      <div className="bg-bubbles-container">
+        <div className="bg-blob blob-1"></div>
+        <div className="bg-blob blob-2"></div>
+        <div className="bg-blob blob-3"></div>
+        <div className="bg-blob blob-4"></div>
+        <div className="bg-blob blob-5"></div>
+      </div>
       <header className="top-header">
         <div className="logo" onClick={() => setView('home')} style={{ cursor: 'pointer' }}>
           <Activity size={28} />
