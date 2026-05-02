@@ -131,24 +131,40 @@ const App = () => {
           </button>
         </motion.div>
 
-        <div style={{ marginTop: '60px' }}>
-          <div className="step-box">
-            <div className="step-num">1</div>
-            <div>Take a clear photo of your skin concern</div>
-          </div>
-          <div className="step-box">
-            <div className="step-num">2</div>
-            <div>Hybrid AI ensemble (VGG, ResNet, DenseNet, etc.) processes features</div>
-          </div>
-          <div className="step-box">
-            <div className="step-num">3</div>
-            <div>Receive your personalized risk assessment</div>
-          </div>
-        </div>
+
       </div>
       <div className="hero-image-wrapper">
         <div className="hero-image-blob" />
         <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=600&q=80" alt="Skin Care" style={{ width: '400px', height: '500px', objectFit: 'cover', borderRadius: '30px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.2)' }} />
+      </div>
+    </div>
+
+    <div className="steps-grid">
+      <div className="process-card">
+        <div className="process-step-badge">Step 1 &rarr;</div>
+        <div className="process-icon-wrapper">
+          <Camera size={40} />
+        </div>
+        <h3 className="process-title">Take a photo</h3>
+        <p className="process-desc">Upload a clear photo of the skin area of concern.</p>
+      </div>
+      
+      <div className="process-card">
+        <div className="process-step-badge">Step 2 &rarr;</div>
+        <div className="process-icon-wrapper">
+          <Activity size={40} />
+        </div>
+        <h3 className="process-title">AI Detects Risks</h3>
+        <p className="process-desc">AI detects early signs of serious skin conditions.</p>
+      </div>
+      
+      <div className="process-card">
+        <div className="process-step-badge">Step 3 &rarr;</div>
+        <div className="process-icon-wrapper">
+          <ShieldCheck size={40} />
+        </div>
+        <h3 className="process-title">Get Your Result</h3>
+        <p className="process-desc">Receive your risk assessment & next steps.</p>
       </div>
     </div>
 
