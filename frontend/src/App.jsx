@@ -54,8 +54,15 @@ const App = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('https://skin-disease-detection-c79p.onrender.com/predict', formData);
+      const response = await axios.post('http://localhost:8000/predict', formData);
       const newResult = response.data;
+      
+      if (newResult.error) {
+        setError(newResult.class + " - " + newResult.details);
+        setStep(2);
+        return;
+      }
+      
       setResult({
         class: newResult.class || 'Unknown',
         confidence: newResult.confidence ? (newResult.confidence * 100).toFixed(2) : 0,

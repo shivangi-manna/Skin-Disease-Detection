@@ -53,9 +53,27 @@ def read_root():
     return {"status": "online", "model_file_exists": os.path.exists(MODEL_PATH)}
 
 def is_skin_image(image: Image.Image) -> bool:
-    # Bypassing strict YCbCr color mask check because dermatoscopic images 
-    # of red/dark lesions or images with black vignettes often fail standard 
-    # skin tone thresholds, leading to false negatives.
+    img_array = np.array(image.convert('RGB'))
+    total_pixels = img_array.shape[0] * img_array.shape[1]
+    
+    # 1. Reject images with too much pure white background (graphs, documents)
+    white_pixels = np.sum(np.all(img_array > 235, axis=-1))
+    if white_pixels / total_pixels > 0.35:
+        return False
+        
+    # 2. Reject mostly grayscale images (scans, some UI screenshots)
+    color_std = np.std(img_array, axis=-1)
+    grayscale_pixels = np.sum(color_std < 15)
+    if grayscale_pixels / total_pixels > 0.8:
+        return False
+        
+    # 3. Reject images lacking warm tones (skin and lesions usually have R > B)
+    # Graphs like the confusion matrix are often blue/cool-toned.
+    r, g, b = img_array[:,:,0], img_array[:,:,1], img_array[:,:,2]
+    red_dominant = np.sum(r > b)
+    if red_dominant / total_pixels < 0.3:
+        return False
+
     return True
 
 @app.post("/predict")
