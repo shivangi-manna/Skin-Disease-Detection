@@ -219,7 +219,7 @@ const App = () => {
             <p style={{ textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)' }}>Detection</p>
             <h3 className="result-class">{result.class}</h3>
             
-            <div style={{ marginTop: '20px', background: 'var(--surface)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <div className="glass-panel" style={{ marginTop: '20px', padding: '16px', borderRadius: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontWeight: '600' }}>Confidence Level</span>
                 <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{result.confidence}%</span>
@@ -249,7 +249,7 @@ const App = () => {
       <p style={{ color: 'var(--text-muted)', marginBottom: '40px' }}>Review your past scans and AI assessments.</p>
       
       {history.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px', background: 'var(--surface)', borderRadius: '24px', border: `1px solid var(--border)` }}>
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '60px', borderRadius: '24px' }}>
           <History size={48} color="var(--border)" style={{ marginBottom: '20px' }} />
           <h3>No scans yet</h3>
           <p style={{ color: 'var(--text-muted)', marginTop: '8px', marginBottom: '24px' }}>Start your first skin assessment today.</p>
