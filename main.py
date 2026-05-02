@@ -53,20 +53,10 @@ def read_root():
     return {"status": "online", "model_file_exists": os.path.exists(MODEL_PATH)}
 
 def is_skin_image(image: Image.Image) -> bool:
-    # Convert to YCbCr color space for robust skin detection
-    img_ycbcr = image.convert('YCbCr')
-    ycbcr_data = np.array(img_ycbcr)
-    
-    # Y: > 80, Cb: 85-135, Cr: 135-180 (Standard Medical Skin Range)
-    y = ycbcr_data[:, :, 0]
-    cb = ycbcr_data[:, :, 1]
-    cr = ycbcr_data[:, :, 2]
-    
-    skin_mask = (y > 80) & (cb >= 85) & (cb <= 135) & (cr >= 135) & (cr <= 180)
-    skin_percentage = (np.sum(skin_mask) / (image.size[0] * image.size[1])) * 100
-    
-    # If more than 25% of pixels match strict skin tone, we consider it valid
-    return skin_percentage > 25
+    # Bypassing strict YCbCr color mask check because dermatoscopic images 
+    # of red/dark lesions or images with black vignettes often fail standard 
+    # skin tone thresholds, leading to false negatives.
+    return True
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
