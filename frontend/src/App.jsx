@@ -13,11 +13,25 @@ const App = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([
-    { id: 1, date: '2026-04-25', diagnosis: 'Melanocytic nevi', confidence: 0.98, status: 'Completed' },
-    { id: 2, date: '2026-04-24', diagnosis: 'Benign keratosis', confidence: 0.92, status: 'Completed' },
-    { id: 3, date: '2026-04-22', diagnosis: 'Vascular lesions', confidence: 0.88, status: 'Completed' },
-  ]);
+  const [history, setHistory] = useState(() => {
+    const savedHistory = localStorage.getItem('scanHistory');
+    if (savedHistory) {
+      try {
+        return JSON.parse(savedHistory);
+      } catch (e) {
+        console.error('Failed to parse history', e);
+      }
+    }
+    return [
+      { id: 1, date: '2026-04-25', diagnosis: 'Melanocytic nevi', confidence: 0.98, status: 'Completed' },
+      { id: 2, date: '2026-04-24', diagnosis: 'Benign keratosis', confidence: 0.92, status: 'Completed' },
+      { id: 3, date: '2026-04-22', diagnosis: 'Vascular lesions', confidence: 0.88, status: 'Completed' },
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('scanHistory', JSON.stringify(history));
+  }, [history]);
 
   const fileInputRef = useRef(null);
 
@@ -68,7 +82,7 @@ const App = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
           <h1 style={{ fontSize: '2.2rem', marginBottom: '8px' }}>Medical Dashboard</h1>
-          <p style={{ color: 'var(--text-dim)' }}>Welcome back, Dr. Shivangi</p>
+          <p style={{ color: 'var(--text-dim)' }}>Welcome back, Admin</p>
         </div>
         <button className="neon-button" onClick={() => setActiveTab('predict')}>
           <Search size={18} />
@@ -90,7 +104,7 @@ const App = () => {
             <span style={{ color: 'var(--text-dim)' }}>Accuracy</span>
             <CheckCircle size={20} color="var(--success)" />
           </div>
-          <div className="stat-value">97.6%</div>
+          <div className="stat-value">91%</div>
           <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>Model: DermScan v2.1</span>
         </div>
         <div className="glass-card stat-card">
