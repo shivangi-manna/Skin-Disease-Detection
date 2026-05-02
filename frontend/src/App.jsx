@@ -101,7 +101,8 @@ const App = () => {
   };
 
   const HomeView = () => (
-    <div className="hero-section">
+    <>
+      <div className="hero-section">
       <div className="hero-content">
         <motion.h1 
           className="hero-title"
@@ -150,6 +151,20 @@ const App = () => {
         <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=600&q=80" alt="Skin Care" style={{ width: '400px', height: '500px', objectFit: 'cover', borderRadius: '30px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.2)' }} />
       </div>
     </div>
+
+    <motion.div 
+      className="glass-panel" 
+      style={{ marginTop: '80px', marginBottom: '40px', padding: '40px', borderRadius: '24px' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <h2 style={{ fontSize: '1.8rem', marginBottom: '16px', color: 'var(--primary)' }}>About DermScan AI</h2>
+      <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', fontSize: '1.1rem' }}>
+        DermScan AI is an advanced, non-invasive diagnostic tool designed to assist in the early detection of skin conditions, including various types of skin cancer. By leveraging a powerful Hybrid Ensemble CNN architecture consisting of 8 cutting-edge deep learning models (such as ResNet, VGG, and DenseNet), the system provides a highly accurate and comprehensive risk assessment. Simply upload a clear image of your skin concern, and our AI will process the features to deliver an instant, secure, and personalized analysis, helping you make informed decisions about your dermatological health. Please remember that while our AI is highly precise, it is not a substitute for professional medical advice.
+      </p>
+    </motion.div>
+  </>
   );
 
   const ScanWizard = () => (
