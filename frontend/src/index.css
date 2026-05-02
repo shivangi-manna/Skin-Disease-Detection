@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #8b5cf6; /* Violet */
-  --primary-hover: #a78bfa;
-  --primary-light: rgba(139, 92, 246, 0.2);
+  --primary: #ff4785; 
+  --primary-hover: #e83a73;
+  --primary-light: rgba(255, 71, 133, 0.2);
   --secondary: #ffffff;
-  --bg-color: #0f172a; 
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-hover: rgba(255, 255, 255, 0.08);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-light: rgba(255, 255, 255, 0.2);
-  --success: #34d399;
-  --danger: #f87171;
+  --bg-color: #ff9a9e; 
+  --surface: rgba(255, 255, 255, 0.15);
+  --surface-hover: rgba(255, 255, 255, 0.25);
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.85);
+  --border: rgba(255, 255, 255, 0.4);
+  --border-light: rgba(255, 255, 255, 0.6);
+  --success: #a7f3d0;
+  --danger: #fca5a5;
   --font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -24,33 +24,44 @@
 }
 
 body {
-  background-color: var(--bg-color);
+  background: linear-gradient(135deg, #fecfef 0%, #ff9a9e 40%, #a18cd1 100%);
   color: var(--text-main);
   font-family: var(--font-family);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
 }
 
 body::before, body::after {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
   z-index: -2;
   pointer-events: none;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 8s ease-in-out infinite;
 }
 body::before {
-  background: radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 40%);
+  top: 15%;
+  left: 10%;
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+  box-shadow: inset -20px -20px 40px rgba(255, 100, 150, 0.5), 0 20px 50px rgba(0,0,0,0.1);
 }
 body::after {
-  background: radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 40%);
+  bottom: 10%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+  box-shadow: inset -20px -20px 40px rgba(150, 100, 200, 0.5), 0 20px 50px rgba(0,0,0,0.1);
+  animation-delay: 2s;
 }
 
 /* Header */
 .top-header {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-light);
