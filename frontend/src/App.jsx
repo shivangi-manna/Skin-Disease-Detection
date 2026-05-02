@@ -346,6 +346,25 @@ const App = () => {
         {view === 'history' && <HistoryView />}
         {view === 'settings' && <SettingsView />}
       </main>
+
+      <nav className="mobile-nav">
+        <div className={`mobile-nav-item ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+          <LayoutDashboard size={20} />
+          <span>Home</span>
+        </div>
+        <div className={`mobile-nav-item ${view === 'scan' ? 'active' : ''}`} onClick={() => setView('scan')}>
+          <Camera size={20} />
+          <span>Scanner</span>
+        </div>
+        <div className={`mobile-nav-item ${view === 'history' ? 'active' : ''}`} onClick={() => setView('history')}>
+          <History size={20} />
+          <span>History</span>
+        </div>
+        <div className={`mobile-nav-item ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
+          <Settings size={20} />
+          <span>Settings</span>
+        </div>
+      </nav>
     </div>
   );
 };
