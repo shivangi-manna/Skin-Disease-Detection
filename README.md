@@ -6,6 +6,10 @@
 
 DermScan AI is a state-of-the-art medical imaging tool designed to assist in the early detection and classification of various skin diseases. Built with **TensorFlow/Keras** and a **FastAPI** backend, it leverages Convolutional Neural Networks (CNN) to achieve high-precision results.
 
+### 🌐 Live Demo
+- **Frontend (Vercel)**: [https://skin-disease-detection-sigma.vercel.app/](https://skin-disease-detection-sigma.vercel.app/)
+- **Backend (Render)**: [https://skin-disease-detection-c79p.onrender.com](https://skin-disease-detection-c79p.onrender.com)
+
 ## ✨ Key Features
 
 - **High Precision Classification**: Achieve up to **97.6% precision** in identifying skin lesions.
