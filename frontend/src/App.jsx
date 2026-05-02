@@ -193,13 +193,13 @@ const App = () => {
               <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
             </div>
           ) : (
-            <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden' }}>
-              <img src={preview} style={{ width: '100%', borderRadius: '20px' }} />
+            <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img src={preview} style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '20px' }} />
               {loading && <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'var(--primary)', boxShadow: '0 0 20px var(--primary)', animation: 'scan 2s infinite ease-in-out' }} />}
               {!loading && !result && (
                 <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
                   <button className="neon-button" onClick={handleUpload}>Run Analysis</button>
-                  <button className="neon-button" style={{ background: 'var(--surface)' }} onClick={reset}>Reset</button>
+                  <button className="neon-button" style={{ background: '#e2e8f0', color: 'var(--text)' }} onClick={reset}>Reset</button>
                 </div>
               )}
             </div>
