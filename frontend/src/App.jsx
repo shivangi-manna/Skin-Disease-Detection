@@ -103,7 +103,7 @@ const App = () => {
   const HomeView = () => (
     <>
       <div className="hero-section">
-      <div className="hero-content">
+      <div className="hero-content glass-panel" style={{ padding: '40px', borderRadius: '32px' }}>
         <motion.h1 
           className="hero-title"
           initial={{ opacity: 0, y: 20 }}
