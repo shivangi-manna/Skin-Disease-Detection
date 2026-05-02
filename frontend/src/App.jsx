@@ -109,7 +109,7 @@ const App = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          Get instant, secure, and accurate at-home screening for various skin conditions. Powered by advanced dermatological AI.
+          Get instant, secure, and accurate at-home screening for various skin conditions. Powered by a novel Hybrid Ensemble CNN architecture utilizing 8 state-of-the-art models.
         </motion.p>
         
         <motion.div 
@@ -130,7 +130,7 @@ const App = () => {
           </div>
           <div className="step-box">
             <div className="step-num">2</div>
-            <div>AI instantly analyzes the image patterns</div>
+            <div>Hybrid AI ensemble (VGG, ResNet, DenseNet, etc.) processes features</div>
           </div>
           <div className="step-box">
             <div className="step-num">3</div>
@@ -184,7 +184,7 @@ const App = () => {
       {step === 3 && (
         <div className="preview-container" style={{ textAlign: 'center' }}>
           <h2 className="wizard-title">Analyzing...</h2>
-          <p className="wizard-subtitle">Our AI is comparing your image against clinical databases.</p>
+          <p className="wizard-subtitle">Extracting features across 8 distinct CNN architectures.</p>
           
           <img src={preview} className="preview-image" style={{ opacity: 0.5 }} alt="Scanning" />
           
@@ -224,6 +224,9 @@ const App = () => {
             
             <p style={{ marginTop: '24px', color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6' }}>
               {result.details || "Please consult a medical professional for an official diagnosis."}
+            </p>
+            <p style={{ marginTop: '12px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '500' }}>
+              Analysis powered by Hybrid Ensemble CNN Model.
             </p>
           </div>
 
