@@ -1,17 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #4f46e5; /* Indigo 600 */
-  --primary-hover: #4338ca; /* Indigo 700 */
-  --primary-light: #e0e7ff; /* Indigo 100 */
-  --secondary: #0f172a; /* Slate 900 */
-  --bg-color: #f8fafc; /* Slate 50 */
-  --surface: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --success: #10b981;
-  --danger: #ef4444;
+  --primary: #8b5cf6; /* Violet */
+  --primary-hover: #a78bfa;
+  --primary-light: rgba(139, 92, 246, 0.2);
+  --secondary: #ffffff;
+  --bg-color: #0f172a; 
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.2);
+  --success: #34d399;
+  --danger: #f87171;
   --font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -29,9 +31,28 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body::before, body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+}
+body::before {
+  background: radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 40%);
+}
+body::after {
+  background: radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 40%);
+}
+
 /* Header */
 .top-header {
-  background: var(--surface);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 16px 40px;
   display: flex;
@@ -73,7 +94,7 @@ body {
 .main-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 40px 20px;
 }
 
 /* Buttons */
@@ -86,33 +107,36 @@ body {
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px -10px var(--primary);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
 }
 
 .btn-secondary {
   background: var(--surface);
+  backdrop-filter: blur(10px);
   color: var(--text-main);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-light);
   padding: 14px 32px;
   border-radius: 100px;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
-  background: var(--bg-color);
-  border-color: var(--text-muted);
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  transform: translateY(-2px);
 }
 
 /* Landing Section */
@@ -153,7 +177,9 @@ body {
   position: absolute;
   width: 400px;
   height: 400px;
-  background: var(--primary-light);
+  background: linear-gradient(135deg, var(--primary), #ec4899);
+  filter: blur(60px);
+  opacity: 0.5;
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
   z-index: -1;
   animation: morph 8s ease-in-out infinite;
@@ -171,9 +197,18 @@ body {
   gap: 16px;
   margin-bottom: 20px;
   background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 16px 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.step-box:hover {
+  transform: translateX(5px);
+  border-color: var(--border-light);
 }
 
 .step-num {
@@ -191,12 +226,14 @@ body {
 /* Wizard / Upload Section */
 .wizard-card {
   background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   max-width: 800px;
   margin: 0 auto;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-light);
 }
 
 .wizard-title {
@@ -213,18 +250,19 @@ body {
 }
 
 .upload-area {
-  border: 2px dashed var(--border);
+  border: 2px dashed var(--border-light);
   border-radius: 20px;
   padding: 60px 20px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s;
-  background: var(--bg-color);
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .upload-area:hover {
   border-color: var(--primary);
-  background: var(--primary-light);
+  background: rgba(139, 92, 246, 0.1);
+  transform: scale(1.02);
 }
 
 .preview-container {
@@ -236,7 +274,7 @@ body {
 
 .preview-image {
   max-width: 100%;
-  max-height: 400px;
+  max-height: 250px;
   object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -246,7 +284,7 @@ body {
 .progress-container {
   width: 100%;
   height: 8px;
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
   margin-top: 20px;
@@ -254,9 +292,10 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: var(--primary);
+  background: linear-gradient(90deg, var(--primary), #ec4899);
   width: 0%;
   transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--primary);
 }
 
 .status-badge {
@@ -270,18 +309,21 @@ body {
 }
 
 .status-success {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 /* Result Area */
 .result-box {
-  background: var(--primary-light);
-  border: 1px solid rgba(79, 70, 229, 0.2);
+  background: rgba(139, 92, 246, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 16px;
   padding: 32px;
   margin-top: 30px;
   text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
 .result-class {
@@ -295,9 +337,11 @@ body {
 .table-container {
   overflow-x: auto;
   background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border: 1px solid var(--border-light);
 }
 
 .custom-table {
@@ -306,7 +350,7 @@ body {
 }
 
 .custom-table th {
-  background: var(--bg-color);
+  background: rgba(0, 0, 0, 0.2);
   padding: 16px 24px;
   text-align: left;
   font-weight: 600;
@@ -335,4 +379,12 @@ body {
   .nav-links {
     display: none; /* simple mobile nav approach */
   }
+}
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
