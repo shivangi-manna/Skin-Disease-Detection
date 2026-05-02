@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #0d9488; /* Teal 600 */
-  --primary-hover: #0f766e; /* Teal 700 */
-  --primary-light: #ccfbf1; /* Teal 50 */
-  --secondary: #1e293b; /* Slate 800 */
+  --primary: #4f46e5; /* Indigo 600 */
+  --primary-hover: #4338ca; /* Indigo 700 */
+  --primary-light: #e0e7ff; /* Indigo 100 */
+  --secondary: #0f172a; /* Slate 900 */
   --bg-color: #f8fafc; /* Slate 50 */
   --surface: #ffffff;
-  --text-main: #0f172a;
+  --text-main: #1e293b;
   --text-muted: #64748b;
   --border: #e2e8f0;
   --success: #10b981;
@@ -277,7 +277,7 @@ body {
 /* Result Area */
 .result-box {
   background: var(--primary-light);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  border: 1px solid rgba(79, 70, 229, 0.2);
   border-radius: 16px;
   padding: 32px;
   margin-top: 30px;
