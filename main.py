@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # Load the model lazily
-MODEL_PATH = "skin_final.h5"
+MODEL_PATH = "best_model.h5"
 _model = None
 
 def get_model():
