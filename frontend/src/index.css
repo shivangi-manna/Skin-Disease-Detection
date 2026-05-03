@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #ff4785; 
-  --primary-hover: #e83a73;
-  --primary-light: rgba(255, 71, 133, 0.2);
-  --secondary: #ffffff;
-  --bg-color: #ff9a9e; 
-  --surface: rgba(255, 255, 255, 0.15);
-  --surface-hover: rgba(255, 255, 255, 0.25);
-  --text-main: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.85);
-  --border: rgba(255, 255, 255, 0.4);
-  --border-light: rgba(255, 255, 255, 0.6);
-  --success: #a7f3d0;
-  --danger: #fca5a5;
+  --primary: #8b5cf6;
+  --primary-hover: #a78bfa;
+  --primary-light: rgba(139, 92, 246, 0.2);
+  --secondary: #38bdf8;
+  --bg-color: #020617;
+  --surface: rgba(15, 23, 42, 0.6);
+  --surface-hover: rgba(30, 41, 59, 0.7);
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.2);
+  --success: #10b981;
+  --danger: #ef4444;
   --font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -24,7 +24,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, #10002b 0%, #240046 40%, #0d1b2a 100%);
+  background: #020617;
   color: var(--text-main);
   font-family: var(--font-family);
   min-height: 100vh;
@@ -42,76 +42,65 @@ body {
   z-index: -2;
   pointer-events: none;
   overflow: hidden;
+  background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
 }
 
 .bg-blob {
   position: absolute;
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  animation: morph-blob 12s ease-in-out infinite, float-blob 15s ease-in-out infinite alternate;
-  box-shadow: inset -15px -15px 40px rgba(0,0,0,0.6), 0 15px 50px rgba(0,0,0,0.4);
-  filter: blur(2px);
+  border-radius: 50%;
+  animation: float-blob 20s ease-in-out infinite alternate;
+  filter: blur(80px);
+  opacity: 0.6;
 }
 
 .blob-1 {
-  top: 5%;
-  left: 5%;
-  width: 450px;
-  height: 450px;
-  background: linear-gradient(135deg, #f72585, #b5179e);
-  animation-duration: 18s, 14s;
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: #4338ca;
+  animation-duration: 25s;
 }
 .blob-2 {
-  bottom: -5%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(135deg, #7209b7, #480ca8);
-  animation-duration: 22s, 16s;
-  animation-delay: -3s;
+  bottom: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: #7e22ce;
+  animation-duration: 28s;
+  animation-delay: -5s;
 }
 .blob-3 {
   top: 40%;
-  right: 15%;
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #4cc9f0, #4361ee);
-  animation-duration: 15s, 12s;
-  animation-delay: -7s;
+  left: 40%;
+  width: 40vw;
+  height: 40vw;
+  background: #0f766e;
+  animation-duration: 22s;
+  animation-delay: -10s;
 }
 .blob-4 {
-  bottom: 15%;
-  left: 10%;
-  width: 350px;
-  height: 350px;
-  background: linear-gradient(135deg, #f72585, #3f37c9);
-  animation-duration: 20s, 18s;
-  animation-delay: -11s;
+  top: 20%;
+  right: 10%;
+  width: 35vw;
+  height: 35vw;
+  background: #be185d;
+  animation-duration: 30s;
+  animation-delay: -15s;
 }
 .blob-5 {
-  top: -10%;
-  right: 35%;
-  width: 350px;
-  height: 350px;
-  background: linear-gradient(135deg, #3f37c9, #7209b7);
-  animation-duration: 25s, 20s;
-  animation-delay: -5s;
+  display: none;
 }
 
 @keyframes float-blob {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  50% { transform: translate(40px, -50px) scale(1.1) rotate(45deg); }
-  100% { transform: translate(-40px, 60px) scale(0.9) rotate(90deg); }
-}
-
-@keyframes morph-blob {
-  0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
-  34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
-  67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5%, 5%) scale(1.1); }
+  100% { transform: translate(-5%, -5%) scale(0.9); }
 }
 
 /* Header */
 .top-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-light);
