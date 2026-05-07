@@ -246,7 +246,7 @@ const App = () => {
                 <Check size={16} /> Analysis Complete
               </div>
               <img src={preview} className="result-preview-img" alt="Result" />
-              <button className="btn-primary" style={{ marginTop: '24px', width: '100%' }} onClick={resetScan}>New Scan</button>
+              <button className="btn-primary" style={{ marginTop: '12px', padding: '12px 40px', display: 'block', marginInline: 'auto' }} onClick={resetScan}>New Scan</button>
             </div>
             
             <div className="result-right-col">
