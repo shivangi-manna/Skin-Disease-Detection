@@ -239,37 +239,99 @@ const App = () => {
       )}
 
       {step === 4 && result && (
-        <div className="preview-container">
-          <div className="status-badge status-success" style={{ alignSelf: 'center', marginBottom: '10px' }}>
-            <Check size={16} /> Analysis Complete
+        <div className="result-layout-grid">
+          <div className="result-left-col">
+            <div className="status-badge status-success" style={{ marginBottom: '20px' }}>
+              <Check size={16} /> Analysis Complete
+            </div>
+            <img src={preview} className="result-preview-img" alt="Result" />
+            <button className="btn-primary" style={{ marginTop: '24px', width: '100%' }} onClick={resetScan}>New Scan</button>
           </div>
           
-          <img src={preview} className="preview-image" style={{ maxHeight: '250px' }} alt="Result" />
-          
-          <div className="result-box" style={{ width: '100%' }}>
-            <p style={{ textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)' }}>Detection</p>
-            <h3 className="result-class">{result.class}</h3>
-            
-            <div className="glass-panel" style={{ marginTop: '20px', padding: '16px', borderRadius: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontWeight: '600' }}>Confidence Level</span>
-                <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{result.confidence}%</span>
+          <div className="result-right-col">
+            <div className="result-box-compact">
+              <p style={{ textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px' }}>Detection</p>
+              <h3 className="result-class-title">{result.class}</h3>
+              
+              <div className="confidence-panel">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Confidence Level</span>
+                  <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{result.confidence}%</span>
+                </div>
+                <div className="progress-container-mini">
+                  <div className="progress-bar" style={{ width: `${result.confidence}%` }} />
+                </div>
               </div>
-              <div className="progress-container" style={{ marginTop: '0', height: '6px' }}>
-                <div className="progress-bar" style={{ width: `${result.confidence}%` }} />
-              </div>
+              
+              <p style={{ marginTop: '16px', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                {result.details || "Please consult a medical professional for an official diagnosis."}
+              </p>
+
+              {parseFloat(result.confidence) > 70 && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="medical-warning-box"
+                >
+                  <AlertCircle size={20} color="var(--danger)" style={{ flexShrink: 0 }} />
+                  <div>
+                    <h4 style={{ color: 'var(--danger)', fontWeight: '700', fontSize: '0.9rem' }}>Urgent: Medical Checkup</h4>
+                    <p style={{ color: 'var(--text-main)', fontSize: '0.8rem', lineHeight: '1.4' }}>
+                      High confidence detected. This could be serious. Please visit a doctor immediately.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              <p style={{ marginTop: '20px', color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '500', textAlign: 'center', opacity: 0.7 }}>
+                Analysis powered by Hybrid Ensemble CNN.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="result-info-footer"
+        >
+          <div className="info-card-grid">
+            <div className="info-subcard">
+              <ShieldCheck size={24} color="var(--success)" />
+              <h4>Prevention Tips</h4>
+              <ul>
+                <li>Apply SPF 30+ sunscreen daily.</li>
+                <li>Avoid sun exposure between 10am - 4pm.</li>
+                <li>Perform monthly skin self-exams.</li>
+              </ul>
             </div>
             
-            <p style={{ marginTop: '24px', color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-              {result.details || "Please consult a medical professional for an official diagnosis."}
-            </p>
-            <p style={{ marginTop: '12px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '500' }}>
-              Analysis powered by Hybrid Ensemble CNN Model.
-            </p>
+            <div className="info-subcard">
+              <AlertCircle size={24} color="var(--primary)" />
+              <h4>What to watch for</h4>
+              <ul>
+                <li>Asymmetry in lesion shapes.</li>
+                <li>Irregular or blurred borders.</li>
+                <li>Sudden changes in color or size.</li>
+              </ul>
+            </div>
+            
+            <div className="info-subcard">
+              <Users size={24} color="var(--secondary)" />
+              <h4>Next Steps</h4>
+              <ul>
+                <li>Consult a certified dermatologist.</li>
+                <li>Keep a log of any skin changes.</li>
+                <li>Share this report with your doctor.</li>
+              </ul>
+            </div>
           </div>
-
-          <button className="btn-primary" style={{ marginTop: '20px' }} onClick={resetScan}>New Scan</button>
-        </div>
+          
+          <div className="disclaimer-text">
+            <p><strong>Disclaimer:</strong> This AI tool is for educational and screening purposes only. It does not provide a medical diagnosis. Always seek the advice of a physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+          </div>
+        </motion.div>
       )}
     </motion.div>
   );
