@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 # Load the model lazily
-MODEL_PATH = "fixed_model.h5"
+MODEL_PATH = "super_fixed_model.h5"
 _model = None
 
 def get_model():
