@@ -419,10 +419,10 @@ export default function App() {
   );
 
   const navItems = [
-    {id:'dashboard', icon:<LayoutDashboard size={22}/>},
-    {id:'scan', icon:<Scan size={22}/>},
-    {id:'history', icon:<History size={22}/>},
-    {id:'settings', icon:<Settings size={22}/>},
+    {id:'dashboard', icon:<LayoutDashboard size={22}/>, label:'Home'},
+    {id:'scan',      icon:<Scan size={22}/>,            label:'Scan'},
+    {id:'history',   icon:<History size={22}/>,         label:'History'},
+    {id:'settings',  icon:<Settings size={22}/>,        label:'Settings'},
   ];
 
   return (
@@ -471,6 +471,19 @@ export default function App() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="mobile-nav">
+        <div className="mobile-nav-inner">
+          {navItems.map(item=>(
+            <div key={item.id} className={`mobile-nav-item ${view===item.id?'active':''}`}
+              onClick={()=>{setView(item.id); if(item.id==='scan') resetScan();}}>
+              {item.icon}
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
