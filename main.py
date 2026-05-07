@@ -9,6 +9,8 @@ from PIL import Image, ImageStat
 import io
 import tensorflow as tf
 import tf_keras as keras
+print(f"TensorFlow version: {tf.__version__}")
+print(f"Keras version: {keras.__version__}")
 
 app = FastAPI()
 
@@ -28,7 +30,7 @@ app.add_middleware(
 )
 
 # Load the model lazily
-MODEL_PATH = "best_model.h5"
+MODEL_PATH = "fixed_model.h5"
 _model = None
 
 def get_model():
@@ -36,7 +38,8 @@ def get_model():
     if _model is None and os.path.exists(MODEL_PATH):
         try:
             # Use tf_keras for better compatibility with .h5 files
-            _model = keras.models.load_model(MODEL_PATH)
+            # Adding compile=False to avoid issues with custom layers or metrics
+            _model = keras.models.load_model(MODEL_PATH, compile=False)
             print(f"Successfully loaded model from {MODEL_PATH}")
         except Exception as e:
             print(f"Error loading model: {e}")
@@ -58,25 +61,32 @@ def read_root():
 
 def is_skin_image(image: Image.Image) -> bool:
     # Resize for faster analysis
-    img = image.copy().resize((100, 100))
-    img_array = np.array(img)
+    img = image.copy().resize((128, 128))
+    img_array = np.array(img).astype(float)
     
     # 1. Basic Stats
     stat = ImageStat.Stat(img)
     stddev = sum(stat.stddev) / 3
-    
-    # 2. Reject extremely low-detail images (pure color blocks)
-    if stddev < 10:
+    if stddev < 12: # Too flat
         return False
         
-    # 3. Reject UI screenshots / Non-Natural images
-    # UI elements often have high contrast and many sharp horizontal/vertical edges.
-    # We check for the ratio of unique colors.
+    # 2. Edge Density Check (Screenshots have sharp horizontal/vertical edges)
+    # Natural skin is smooth with gradual gradients.
+    # Compute gradients
+    dy, dx = np.gradient(np.mean(img_array, axis=-1))
+    edge_magnitude = np.sqrt(dx**2 + dy**2)
+    # UI screenshots usually have many pixels with very high gradient (sharp lines)
+    # and many with zero gradient (flat backgrounds).
+    high_edge_pct = np.sum(edge_magnitude > 40) / edge_magnitude.size
+    if high_edge_pct > 0.12: # Too many sharp edges for a skin photo
+        return False
+
+    # 3. Unique Color Distribution
     pixels = img_array.reshape(-1, 3)
     unique_colors = len(np.unique(pixels, axis=0))
-    # Natural skin photos usually have a lot of subtle gradients (high unique colors relative to simplicity)
-    # but screenshots have extreme numbers of colors or very few.
-    if unique_colors < 100: # Too simple
+    # Natural photos have thousands of unique colors due to sensor noise and gradients.
+    # Screenshots often have fewer or extremely specific patterns.
+    if unique_colors < 800: 
         return False
 
     # 4. Color range check (Skin is generally in a specific HSV range)
@@ -84,17 +94,18 @@ def is_skin_image(image: Image.Image) -> bool:
     h, s, v = hsv_img.split()
     h_arr = np.array(h)
     # Skin usually falls in low hue (red/orange/yellow) 0-30 or 240-255
-    skin_hue_mask = (h_arr < 35) | (h_arr > 230)
+    # We broaden slightly but skin is rarely green/blue.
+    skin_hue_mask = (h_arr < 40) | (h_arr > 220)
     skin_hue_pct = np.sum(skin_hue_mask) / h_arr.size
     
-    if skin_hue_pct < 0.25: # If less than 25% of image matches skin tones
+    if skin_hue_pct < 0.35: # If less than 35% of image matches skin/lesion tones
         return False
 
-    # 5. Check for "flat" areas typical of UI backgrounds
-    # Screenshots of windows often have large regions of identical pixels
+    # 5. Flat region check
+    # Screenshots of windows often have large regions of perfectly identical pixels
     diffs = np.diff(img_array, axis=0)
-    flat_rows = np.sum(np.all(diffs == 0, axis=-1)) / (100 * 100)
-    if flat_rows > 0.4: # Too much flat area
+    flat_pixels = np.sum(np.all(diffs == 0, axis=-1)) / img_array.size
+    if flat_pixels > 0.15: # Too much perfectly flat area
         return False
 
     return True
