@@ -1,5 +1,4 @@
 import os
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +7,7 @@ import numpy as np
 from PIL import Image, ImageStat
 import io
 import tensorflow as tf
-import tf_keras as keras
+import keras
 print(f"TensorFlow version: {tf.__version__}")
 print(f"Keras version: {keras.__version__}")
 
@@ -30,7 +29,7 @@ app.add_middleware(
 )
 
 # Load the model lazily
-MODEL_PATH = "super_fixed_model.h5"
+MODEL_PATH = "best_model.h5"
 _model = None
 
 def get_model():
@@ -60,52 +59,70 @@ def read_root():
     return {"status": "online", "model_file_exists": os.path.exists(MODEL_PATH)}
 
 def is_skin_image(image: Image.Image) -> bool:
-    # Resize for faster analysis
-    img = image.copy().resize((128, 128))
-    img_array = np.array(img).astype(float)
+    """
+    Strict dermoscopy-focused validation.
+    Rejects: selfies, portraits, full-body shots, random photos.
+    Accepts: close-up macro skin lesion photos.
+    """
+    img128 = image.copy().resize((128, 128))
+    img_arr = np.array(img128).astype(float)
+    r, g, b = img_arr[:,:,0], img_arr[:,:,1], img_arr[:,:,2]
+
+    # ── 1. Reject if image is too dark or too bright (not a proper skin photo) ──
+    mean_brightness = img_arr.mean()
+    if mean_brightness < 40 or mean_brightness > 230:
+        return False
+
+    # ── 2. Skin tone dominance check ──
+    # True skin lesion close-ups are dominated by red/orange/pink/brown pixels.
+    # r > g > b is the canonical skin channel ordering.
+    skin_pixel_mask = (r > 60) & (r > g) & (g > b * 0.7) & (r - b > 15)
+    skin_pct = np.sum(skin_pixel_mask) / (128 * 128)
+    if skin_pct < 0.40:   # At least 40% of pixels must look like skin
+        return False
+
+    # ── 3. Reject portraits / selfies via background uniformity ──
+    # Close-up skin photos have VERY uniform background color variation.
+    # Portraits have hair, clothing, surroundings — high inter-channel variance.
+    hsv = img128.convert('HSV')
+    h_arr, s_arr, v_arr = [np.array(c).astype(float) for c in hsv.split()]
     
-    # 1. Basic Stats
-    stat = ImageStat.Stat(img)
-    stddev = sum(stat.stddev) / 3
-    if stddev < 12: # Too flat
-        return False
-        
-    # 2. Edge Density Check (Screenshots have sharp horizontal/vertical edges)
-    # Natural skin is smooth with gradual gradients.
-    # Compute gradients
-    dy, dx = np.gradient(np.mean(img_array, axis=-1))
-    edge_magnitude = np.sqrt(dx**2 + dy**2)
-    # UI screenshots usually have many pixels with very high gradient (sharp lines)
-    # and many with zero gradient (flat backgrounds).
-    high_edge_pct = np.sum(edge_magnitude > 40) / edge_magnitude.size
-    if high_edge_pct > 0.12: # Too many sharp edges for a skin photo
+    # Saturation std: dermoscopy images have LOW saturation variance (uniform lesion)
+    # Portraits have high saturation variation (hair, lips, clothing, background)
+    sat_std = s_arr.std()
+    if sat_std > 68:      # High saturation spread → not a close-up skin photo
         return False
 
-    # 3. Unique Color Distribution
-    pixels = img_array.reshape(-1, 3)
-    unique_colors = len(np.unique(pixels, axis=0))
-    # Natural photos have thousands of unique colors due to sensor noise and gradients.
-    # Screenshots often have fewer or extremely specific patterns.
-    if unique_colors < 800: 
-        return False
-
-    # 4. Color range check (Skin is generally in a specific HSV range)
-    hsv_img = img.convert('HSV')
-    h, s, v = hsv_img.split()
-    h_arr = np.array(h)
-    # Skin usually falls in low hue (red/orange/yellow) 0-30 or 240-255
-    # We broaden slightly but skin is rarely green/blue.
-    skin_hue_mask = (h_arr < 40) | (h_arr > 220)
+    # ── 4. Hue concentration check ──
+    # Dermoscopy close-ups have hue concentrated in red/brown range.
+    # Portraits introduce greens (background), blues (clothing), etc.
+    skin_hue_mask = (h_arr < 45) | (h_arr > 210)
     skin_hue_pct = np.sum(skin_hue_mask) / h_arr.size
-    
-    if skin_hue_pct < 0.35: # If less than 35% of image matches skin/lesion tones
+    if skin_hue_pct < 0.50:   # >50% pixels must be red/brown/pink hue
         return False
 
-    # 5. Flat region check
-    # Screenshots of windows often have large regions of perfectly identical pixels
-    diffs = np.diff(img_array, axis=0)
-    flat_pixels = np.sum(np.all(diffs == 0, axis=-1)) / img_array.size
-    if flat_pixels > 0.15: # Too much perfectly flat area
+    # ── 5. Structural edge check ──
+    # Dermoscopy: smooth gradients, no harsh structured lines (like face features).
+    # Portraits have sharp eyes, nose, mouth, hair edges → many high-gradient pixels.
+    gray = np.mean(img_arr, axis=-1)
+    dy, dx = np.gradient(gray)
+    edge_mag = np.sqrt(dx**2 + dy**2)
+    # Portraits have BOTH many sharp edges (features) AND flat regions (background).
+    high_edge_pct = np.sum(edge_mag > 35) / edge_mag.size
+    if high_edge_pct > 0.08:  # Too many sharp structural edges
+        return False
+
+    # ── 6. Green channel rejection ──
+    # If green channel average is close to red, likely not a skin-dominant image.
+    mean_r, mean_g, mean_b = r.mean(), g.mean(), b.mean()
+    if (mean_r - mean_g) < 8:   # Red must dominate over green for skin
+        return False
+
+    # ── 7. Local texture variance (dermoscopy has subtle micro-texture) ──
+    # Flat solid-color images and low-detail photos are rejected.
+    stat = ImageStat.Stat(img128)
+    avg_std = sum(stat.stddev[:3]) / 3
+    if avg_std < 15 or avg_std > 90:  # Too flat OR too chaotic (not skin close-up)
         return False
 
     return True

@@ -24,7 +24,10 @@ def patch_h5_deeply(input_path, output_path):
         if 'config' in layer:
             l_config = layer['config']
             
-            # Fix batch_input_shape
+            # Fix batch_input_shape and batch_shape
+            if 'batch_shape' in l_config:
+                l_config['batch_input_shape'] = l_config.pop('batch_shape')
+            
             if 'batch_input_shape' in l_config:
                 val = l_config['batch_input_shape']
                 if isinstance(val, str):
@@ -45,8 +48,13 @@ def patch_h5_deeply(input_path, output_path):
             # Fix nested layers (like in TimeDistributed or Bidirectional)
             if 'layer' in l_config:
                 fix_layer(l_config['layer'])
+            
+            # Fix sub-layers in Sequential or Functional (Keras puts layers inside config)
+            if 'layers' in l_config:
+                for sub_layer in l_config['layers']:
+                    fix_layer(sub_layer)
         
-        # Fix sub-layers in Sequential or Functional
+        # Just in case layers are at the root of the layer dict
         if 'layers' in layer:
             for sub_layer in layer['layers']:
                 fix_layer(sub_layer)
