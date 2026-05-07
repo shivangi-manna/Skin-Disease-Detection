@@ -58,3 +58,4 @@ test_*.py
 convert_k3_to_k2.py
 sample.jpg
 super_fixed_model.h5
+*.h5
