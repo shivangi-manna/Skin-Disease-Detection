@@ -459,10 +459,11 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), #ec4899);
-  width: 0%;
-  transition: width 0.3s ease;
-  box-shadow: 0 0 10px var(--primary);
+  background: linear-gradient(90deg, #8b5cf6, #ec4899) !important;
+  display: block !important;
+  border-radius: inherit;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
 }
 
 .medical-warning-box {
